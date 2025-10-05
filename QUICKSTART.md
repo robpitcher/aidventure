@@ -1,6 +1,25 @@
 # Quick Start Guide
 
-## Initial Setup
+## Option 1: Docker (Recommended)
+
+The fastest way to get started with a consistent development environment.
+
+1. **Prerequisites**: Docker Desktop or Docker Engine + Docker Compose
+
+2. **Start the application**:
+   ```bash
+   docker compose up
+   ```
+   Visit http://localhost:5173
+
+3. **Stop the application**:
+   ```bash
+   docker compose down
+   ```
+
+## Option 2: Local Development
+
+### Initial Setup
 
 1. **Prerequisites**: Node.js >= 20.0.0
 
