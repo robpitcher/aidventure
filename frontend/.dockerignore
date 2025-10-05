@@ -18,4 +18,3 @@ coverage
 .nyc_output
 *.test.ts
 *.test.tsx
-__tests__
