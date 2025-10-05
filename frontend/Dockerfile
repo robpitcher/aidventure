@@ -22,7 +22,7 @@ COPY . .
 EXPOSE 5173
 
 # Start development server with host exposure for Docker
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+CMD ["npm", "run", "dev"]
 
 # Stage 2: Build (for production)
 FROM node:20-slim AS build
