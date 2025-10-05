@@ -1,0 +1,65 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.json text
+*.md text
+*.yml text
+*.yaml text
+*.xml text
+*.html text
+*.css text
+*.scss text
+*.sass text
+*.less text
+
+# Configuration files
+*.config.js text
+*.config.ts text
+*.config.json text
+.eslintrc.* text
+.prettierrc.* text
+tsconfig*.json text
+package.json text
+package-lock.json text
+
+# Shell scripts should always use LF
+*.sh text eol=lf
+
+# Windows batch files should always use CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files should not be touched
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary
+*.tgz binary
+
+# Docker files
+Dockerfile text
+docker-compose*.yml text
+.dockerignore text
+
+# Git files
+.gitignore text
+.gitattributes text
+
+# IDE files
+*.code-workspace text
