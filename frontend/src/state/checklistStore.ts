@@ -33,8 +33,14 @@ interface ChecklistState {
 }
 
 export const useChecklistStore = create<ChecklistState>((set, get) => {
+  // Track if we're in the middle of our own update to prevent double-adding
+  let isUpdating = false;
+
   // Subscribe to storage changes for cross-tab sync
   checklistStorage.onStorageChange((event: StorageChangeEvent) => {
+    // Ignore events triggered by our own updates
+    if (isUpdating) return;
+    
     const { checklists } = get();
     
     switch (event.type) {
@@ -87,6 +93,7 @@ export const useChecklistStore = create<ChecklistState>((set, get) => {
     createChecklist: async (name: string) => {
       set({ isLoading: true, error: null });
       try {
+        isUpdating = true;
         const checklist = createEmptyChecklist(name);
         await checklistStorage.saveChecklist(checklist);
         set((state) => ({
@@ -94,8 +101,10 @@ export const useChecklistStore = create<ChecklistState>((set, get) => {
           currentChecklistId: checklist.id,
           isLoading: false,
         }));
+        isUpdating = false;
         return checklist;
       } catch (error) {
+        isUpdating = false;
         set({
           error: error instanceof Error ? error.message : 'Failed to create checklist',
           isLoading: false,
@@ -107,6 +116,7 @@ export const useChecklistStore = create<ChecklistState>((set, get) => {
     updateChecklist: async (checklist: Checklist) => {
       set({ isLoading: true, error: null });
       try {
+        isUpdating = true;
         await checklistStorage.saveChecklist(checklist);
         set((state) => ({
           checklists: state.checklists.map((c) =>
@@ -114,7 +124,9 @@ export const useChecklistStore = create<ChecklistState>((set, get) => {
           ),
           isLoading: false,
         }));
+        isUpdating = false;
       } catch (error) {
+        isUpdating = false;
         set({
           error: error instanceof Error ? error.message : 'Failed to update checklist',
           isLoading: false,
@@ -126,13 +138,16 @@ export const useChecklistStore = create<ChecklistState>((set, get) => {
     deleteChecklist: async (id: string) => {
       set({ isLoading: true, error: null });
       try {
+        isUpdating = true;
         await checklistStorage.deleteChecklist(id);
         set((state) => ({
           checklists: state.checklists.filter((c) => c.id !== id),
           currentChecklistId: state.currentChecklistId === id ? null : state.currentChecklistId,
           isLoading: false,
         }));
+        isUpdating = false;
       } catch (error) {
+        isUpdating = false;
         set({
           error: error instanceof Error ? error.message : 'Failed to delete checklist',
           isLoading: false,
