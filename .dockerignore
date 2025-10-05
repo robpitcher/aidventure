@@ -1,0 +1,25 @@
+# DevContainer .dockerignore
+# Used when building the devcontainer (context is root)
+
+# Dependencies (will be installed in container)
+**/node_modules
+
+# Build outputs (generated during development)
+**/dist
+**/build
+
+# Environment files (should not be in image)
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Git (not needed in image)
+.git
+.gitignore
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+
+# Logs
+**/*.log

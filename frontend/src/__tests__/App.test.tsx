@@ -8,14 +8,13 @@ describe('App', () => {
     expect(screen.getByText('Aidventure')).toBeInTheDocument();
   });
 
-  it('renders the welcome message', () => {
+  it('renders the subtitle', () => {
     render(<App />);
-    expect(screen.getByText('Welcome to Aidventure')).toBeInTheDocument();
+    expect(screen.getByText('AI Adventure Racing Assistant')).toBeInTheDocument();
   });
 
-  it('renders action buttons', () => {
+  it('renders the demo component with loading state', () => {
     render(<App />);
-    expect(screen.getByText('Create Checklist')).toBeInTheDocument();
-    expect(screen.getByText('AI Assist')).toBeInTheDocument();
+    expect(screen.getByText(/Loading checklists.../i)).toBeInTheDocument();
   });
 });
