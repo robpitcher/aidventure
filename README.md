@@ -6,15 +6,35 @@ AI Adventure Racing Assistant - An MVP web application that helps adventure race
 
 Aidventure is a React-based web application designed to help adventure racers create, refine, and manage packing checklists for races. Users can manually add checklist items or use AI assistance to generate tailored packing checklists based on race parameters like duration, disciplines, location, weather, and team size.
 
+### Current Implementation Status
+
+**✅ Implemented:**
+
+- Complete type system for checklists and items
+- LocalStorage persistence layer with cross-tab synchronization
+- Zustand state management with full CRUD operations
+- Comprehensive test coverage (storage + state management)
+- Working demo component showing the storage system
+- Docker development environment with hot reload
+- Complete linting and formatting setup
+
+**⏳ In Progress / Planned:**
+
+- User-facing UI pages (checklist view, editing interface)
+- AI service integration (Azure OpenAI)
+- AI-assisted checklist generation flow
+
 ## Tech Stack
 
-- **Frontend**: React 19 + Vite + TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand (for shared state across 3+ components)
-- **Testing**: Vitest + React Testing Library
-- **Linting**: ESLint + Prettier
+- **Frontend**: React 19 + Vite 7 + TypeScript 5.9
+- **Styling**: Tailwind CSS 3.4 (with custom outdoor racing theme)
+- **State Management**: Zustand 5.0
+- **Storage**: localStorage with abstraction layer (future-ready for IndexedDB)
+- **Testing**: Vitest 3.2 + React Testing Library + @testing-library/jest-dom
+- **Linting**: ESLint 9 (flat config) + Prettier 3.6
 - **Package Manager**: npm
-- **Runtime**: Node.js 20 LTS
+- **Runtime**: Node.js >= 20.0.0
+- **Containerization**: Docker + Docker Compose
 
 ## Project Structure
 
@@ -23,21 +43,35 @@ aidventure/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Page-level components
-│   │   ├── ai/             # AI service and prompt building
-│   │   ├── checklist/      # Checklist-specific components and logic
+│   │   │   └── ChecklistDemo.tsx (working demo)
+│   │   ├── pages/          # Page-level components (to be created)
+│   │   ├── ai/             # AI service and prompt building (to be created)
+│   │   ├── checklist/      # Checklist-specific components (to be created)
 │   │   ├── state/          # Global state management (Zustand)
+│   │   │   └── checklistStore.ts (complete CRUD operations)
+│   │   ├── storage/        # Persistence layer
+│   │   │   └── checklistStorage.ts (localStorage implementation)
 │   │   ├── types/          # TypeScript type definitions
+│   │   │   └── checklist.ts (complete data model)
 │   │   └── __tests__/      # Test files
+│   │       ├── App.test.tsx
+│   │       ├── checklistStorage.test.ts
+│   │       ├── checklistStore.test.ts
+│   │       └── setup.ts
 │   ├── public/             # Static assets
+│   ├── Dockerfile          # Multi-stage Docker build
+│   ├── STORAGE.md          # Storage implementation docs
 │   └── package.json
+├── docker-compose.yml      # Docker Compose configuration
 ├── PRD.md                  # Product Requirements Document
+├── QUICKSTART.md          # Developer onboarding guide
 └── README.md               # This file
 ```
 
 ## Prerequisites
 
 - **Docker** (recommended): Docker Desktop or Docker Engine + Docker Compose
+
   - [Install Docker Desktop](https://www.docker.com/products/docker-desktop/)
   - Or install Docker Engine and Docker Compose separately
 
@@ -153,16 +187,52 @@ In the `frontend/` directory, you can run:
 
 ### State Management
 
-Use Zustand when state needs to be:
-- Shared across 3+ components
-- Persisted to localStorage
-- Otherwise, prefer local component state
+The application uses Zustand for state management with a complete implementation in `src/state/checklistStore.ts`:
+
+**Implemented Store Actions:**
+
+- `loadChecklists()` - Load all checklists from storage
+- `createChecklist(name)` - Create a new checklist
+- `updateChecklist(checklist)` - Update an existing checklist
+- `deleteChecklist(id)` - Delete a checklist
+- `setCurrentChecklist(id)` - Set the active checklist
+- `addItem(checklistId, item)` - Add an item to a checklist
+- `updateItem(checklistId, itemId, updates)` - Update a checklist item
+- `deleteItem(checklistId, itemId)` - Remove an item
+- `toggleItemComplete(checklistId, itemId)` - Toggle item completion status
+
+**Features:**
+
+- Automatic cross-tab synchronization
+- Error handling and loading states
+- Integration with localStorage persistence layer
+
+Use the store for all state operations. Do not access the storage layer directly from components.
 
 ### Testing
 
-- Unit tests: Prompt builder, schema validator
-- Component tests: Checklist CRUD interactions
-- Run tests before committing: `npm test`
+The project has comprehensive test coverage for core functionality:
+
+**Implemented Tests:**
+
+- Storage layer: CRUD operations, timestamps, cross-tab sync, error handling
+- State management: All Zustand store actions and state updates
+- Component: Basic App component test
+
+**Test Commands:**
+
+- `npm test` - Run tests in watch mode
+- `npm run test:ui` - Run tests with Vitest UI
+- Run tests before committing
+
+**Testing Stack:**
+
+- Vitest 3.2 with jsdom environment
+- React Testing Library for component testing
+- @testing-library/jest-dom for enhanced matchers
+- @testing-library/user-event for user interaction testing
+
+See `src/__tests__/` for examples and `STORAGE.md` for storage implementation details.
 
 ### Folder Organization
 
@@ -175,12 +245,29 @@ Use Zustand when state needs to be:
 
 ## Data Model
 
-See `frontend/src/types/checklist.ts` for the complete data model. Key types:
+The complete data model is defined in `frontend/src/types/checklist.ts`. Key types:
 
-- `Checklist` - Main checklist entity
-- `Item` - Individual checklist item
-- `AIGenerationParams` - Parameters for AI generation
-- `CategoryResponse` - AI response structure
+- `Checklist` - Main checklist entity with items and metadata
+- `Item` - Individual checklist item with category, notes, quantity, priority
+- `AIGenerationParams` - Parameters for AI-assisted generation
+- `AIChecklistResponse` - AI response structure
+- `CategoryResponse` - Category with items from AI
+- `ItemResponse` - Individual item from AI response
+- `GeneratedChecklistMeta` - Metadata for AI-generated checklists
+- `ChatSession` - Chat history for iterative refinement
+
+**Storage Implementation:**
+
+The storage layer (`src/storage/checklistStorage.ts`) provides:
+
+- `ChecklistStorageAPI` interface for abstraction
+- `LocalStorageChecklistStorage` implementation
+- Helper functions: `createEmptyChecklist()`, `generateChecklistId()`, `generateItemId()`
+- Automatic timestamp management
+- Cross-tab synchronization
+- Versioning for future migrations
+
+See `STORAGE.md` for detailed documentation on the storage system.
 
 ## Docker Development
 
@@ -234,33 +321,40 @@ docker run -p 8080:80 aidventure-frontend:latest
 ### Docker Issues
 
 **"Exit handler never called!" npm warning during build:**
+
 - This is a [known npm bug](https://github.com/npm/cli/issues/4769) in Docker environments
 - The warning is benign and doesn't affect container functionality
 - Dependencies are still installed correctly
 - You can safely ignore this warning
 
 **Hot reload not working:**
+
 - The Vite config uses polling to detect file changes in Docker
 - If changes aren't reflected, restart the container: `docker compose restart frontend`
 
 **Port already in use:**
+
 - Stop the conflicting service or change the port in `docker-compose.yml`
 - Check running containers: `docker ps`
 
 **Changes to package.json not reflected:**
+
 - Rebuild the container: `docker compose up --build`
 - Or rebuild specific service: `docker compose build frontend`
 
 **Permission errors on Linux:**
+
 - Files created by Docker may be owned by root
 - Fix with: `sudo chown -R $USER:$USER .`
 
 **Container fails to start:**
+
 - Check logs: `docker compose logs frontend`
 - Ensure Docker Desktop/Engine is running
 - Verify port 5173 is not in use: `lsof -i :5173` (macOS/Linux) or `netstat -ano | findstr :5173` (Windows)
 
 **Cannot connect to container:**
+
 - Ensure you're accessing `http://localhost:5173` (not `http://0.0.0.0:5173`)
 - Check container is running: `docker compose ps`
 - Verify firewall settings
@@ -268,25 +362,39 @@ docker run -p 8080:80 aidventure-frontend:latest
 ### General Issues
 
 **Build errors:**
+
 - Clear build cache: `rm -rf frontend/dist frontend/node_modules`
 - Reinstall dependencies: `cd frontend && npm install`
 
 **Test failures:**
+
 - Ensure all dependencies are installed: `npm install`
 - Clear test cache: `npm test -- --clearCache`
 
 **Linting errors:**
+
 - Auto-fix: `npm run format`
 - Check specific issues: `npm run lint`
 
 ## Future Enhancements
 
-- Backend proxy for secure Azure OpenAI key usage
+**Planned Features:**
+
+- User-facing checklist UI (list view, editing, filtering)
+- AI service integration with Azure OpenAI
+- AI-assisted checklist generation with structured Q&A flow
+- Backend proxy for secure Azure OpenAI key management
+
+**Potential Future Additions:**
+
 - CI/CD with GitHub Actions
-- User authentication
+- User authentication and cloud sync
 - Cloud deployment (Azure)
 - Weather API integration
 - Gear optimization recommendations
+- Export to PDF/CSV
+- Team-specific pack allocation
+- Weight tracking
 
 ## Contributing
 
@@ -305,9 +413,10 @@ MIT License - see LICENSE file for details
 ## Documentation
 
 - [PRD.md](./PRD.md) - Detailed product requirements and specifications
-- [Custom Instructions](./.github/copilot-instructions.md) - Development guidelines for Copilot
+- [QUICKSTART.md](./QUICKSTART.md) - Quick developer onboarding guide
+- [STORAGE.md](./frontend/STORAGE.md) - Storage and state management documentation
+- [Copilot Instructions](./.github/copilot-instructions.md) - Development guidelines for Copilot agents
 
 ## Support
 
 For questions or issues, please open an issue on GitHub.
-
