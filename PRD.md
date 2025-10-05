@@ -1,5 +1,5 @@
 ## Product Requirements Document (PRD)
-### AI Adventure Racing Assistant – MVP (Packing Checklist with AI Assist)
+### Aidventure – MVP (Packing Checklist with AI Assist)
 
 ---
 
