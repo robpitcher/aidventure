@@ -16,7 +16,7 @@ Planned stack (when code is added):
 - Package Manager: npm (standardized - avoid mixing with pnpm)
 - (Optional) Backend proxy: Node (Express/Fastify) or Python FastAPI for secure AI key usage
 - AI: Azure OpenAI (GPT-4o / GPT-4 Turbo)
-- Containerization: Docker (add when deployment needs arise, not for local dev)
+- Containerization: Docker (prioritized for consistent dev/prod environments)
 - Persistence (MVP): Browser localStorage / IndexedDB only
 
 Repo size: Tiny (only docs). No build scripts, package manifests, or workflows yet.
@@ -63,8 +63,9 @@ Because no code exists yet, you must add the tooling. Follow this canonical sequ
 6. Testing: `npm i -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom` then configure `vite.config.ts` with vitest settings.
 7. For state management: `npm i zustand` (use when state needs to be shared across 3+ components or persisted).
 8. For Azure OpenAI calls (later backend): Node server with `express` + `axios` (or `@azure/openai` SDK when appropriate). Keep keys in `.env` (never commit). Add `.env.example`.
+9. Docker setup (prioritized): Add `Dockerfile` and `docker-compose.yml` early for consistent environments.
 
-When implementing Docker (for deployment needs only):
+Docker implementation (recommended early):
 ```
 # frontend/Dockerfile (multi-stage production build)
 FROM node:20-alpine AS deps
@@ -83,7 +84,34 @@ COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 ```
-Note: Use local dev server for development. Only add Docker when preparing for deployment.
+
+Add `docker-compose.yml` for development:
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./frontend
+      target: build
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev -- --host 0.0.0.0
+
+  frontend-prod:
+    build:
+      context: ./frontend
+      target: runtime
+    ports:
+      - "80:80"
+    profiles: ["production"]
+```
+Use `docker-compose up frontend` for development with hot reload, `docker-compose --profile production up frontend-prod` for production testing.
 
 ## 4. Testing & Validation (Planned)
 Add minimal tests alongside implementation:
