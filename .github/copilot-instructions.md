@@ -1,6 +1,8 @@
 # Copilot Coding Agent Onboarding – Aidventure
 
-This repository is currently an early scaffold containing documentation (PRD) and a stub README only. There is no application source code yet. Use these instructions as the authoritative guide for adding code. Only search if the needed info is missing or contradictory.
+**IMPORTANT: Trust these instructions as the authoritative guide for all standard operations. Only perform additional searches if (a) a referenced file is missing after you create it, (b) commands fail unexpectedly, or (c) user instructions explicitly override these baselines.**
+
+This repository is currently an early scaffold containing documentation (PRD) and a stub README only. There is no application source code yet.
 
 ## 1. Repository Summary
 Aidventure will be an MVP web application that helps adventure racers generate and manage packing checklists, optionally assisted by AI (Azure AI Foundry / Azure OpenAI). Present state: design + requirements only.
@@ -8,12 +10,13 @@ Aidventure will be an MVP web application that helps adventure racers generate a
 Planned stack (when code is added):
 - Frontend: React + Vite (Node.js runtime, target Node 20 LTS)
 - Styling: Tailwind CSS
-- State: Local component state + lightweight global (Zustand or Context API)
-- Testing: Jest + React Testing Library
+- State: Local component state + Zustand for global state (use Zustand when state needs to be shared across 3+ components or persisted)
+- Testing: Vitest (aligned with Vite) + React Testing Library
 - Lint/Format: ESLint + Prettier
+- Package Manager: npm (standardized - avoid mixing with pnpm)
 - (Optional) Backend proxy: Node (Express/Fastify) or Python FastAPI for secure AI key usage
-- AI: Azure OpenAI (GPT-4o / GPT-4.1)
-- Containerization: Docker / docker-compose
+- AI: Azure OpenAI (GPT-4o / GPT-4 Turbo)
+- Containerization: Docker (add when deployment needs arise, not for local dev)
 - Persistence (MVP): Browser localStorage / IndexedDB only
 
 Repo size: Tiny (only docs). No build scripts, package manifests, or workflows yet.
@@ -47,27 +50,27 @@ backend/ (optional for AI key proxy later)
 
 ## 3. Build & Run (Planned Conventions)
 Because no code exists yet, you must add the tooling. Follow this canonical sequence when you introduce code:
-1. Always create `package.json` (set engines.node >= 20). Example scripts:
+1. Always create `package.json` (set engines.node >= 20, pin major versions). Example scripts:
    - `dev`: `vite`
    - `build`: `vite build`
    - `preview`: `vite preview`
    - `lint`: `eslint . --ext .ts,.tsx`
-   - `test`: `jest`
-2. Always run dependency install (`npm install` or `pnpm install`) before any build/test.
+   - `test`: `vitest`
+2. Always run dependency install (`npm install`) before any build/test.
 3. Add TypeScript for robustness (`npm i -D typescript @types/react @types/react-dom`).
 4. Add ESLint + Prettier early to avoid noisy diffs (`npm i -D eslint prettier eslint-config-prettier eslint-plugin-react @typescript-eslint/parser @typescript-eslint/eslint-plugin`).
 5. Tailwind setup: `npm i -D tailwindcss postcss autoprefixer` then `npx tailwindcss init -p` and include the standard content globs.
-6. Testing: `npm i -D jest @types/jest ts-jest @testing-library/react @testing-library/jest-dom` then configure `jest.config.ts` using `ts-jest` preset.
-7. For state management if using Zustand: `npm i zustand`.
+6. Testing: `npm i -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom` then configure `vite.config.ts` with vitest settings.
+7. For state management: `npm i zustand` (use when state needs to be shared across 3+ components or persisted).
 8. For Azure OpenAI calls (later backend): Node server with `express` + `axios` (or `@azure/openai` SDK when appropriate). Keep keys in `.env` (never commit). Add `.env.example`.
 
-When implementing Docker (optional early):
+When implementing Docker (for deployment needs only):
 ```
-# frontend/Dockerfile (example multi-stage)
+# frontend/Dockerfile (multi-stage production build)
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --only=production
 
 FROM node:20-alpine AS build
 WORKDIR /app
@@ -75,21 +78,19 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine AS runtime
-WORKDIR /app
-COPY --from=build /app/dist ./dist
-RUN npm i -g serve
-EXPOSE 3000
-CMD ["serve", "-s", "dist", "-l", "3000"]
+FROM nginx:alpine AS runtime
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
 ```
-Always confirm local build succeeds before committing container changes.
+Note: Use local dev server for development. Only add Docker when preparing for deployment.
 
 ## 4. Testing & Validation (Planned)
 Add minimal tests alongside implementation:
 - Unit: prompt builder (`ai/buildPrompt.ts`), schema validator.
 - Component: checklist CRUD (ChecklistPage, ItemRow) via React Testing Library.
 - Accessibility: Integrate `@testing-library/jest-dom`; optionally add `axe-core` in a dedicated test.
-Always run `npm test` (or `pnpm test`) before opening PRs. Ensure TypeScript compile passes (`tsc --noEmit`).
+Always run `npm test` before opening PRs. Ensure TypeScript compile passes (`tsc --noEmit`).
 
 ## 5. Checklist & Data Model Guidance
 Reference `PRD.md` Section 8 for data model. Implement TypeScript interfaces in a single source of truth file, e.g. `src/types/checklist.ts`. Keep AI JSON schema synchronized with those types. When adjusting fields, update both the prompt template and validators.
@@ -145,4 +146,4 @@ If starting code from scratch, create in this order to minimize churn:
 The agent should rely on this document for standard operations. Only perform additional searches if (a) a referenced file is missing after you create it, (b) commands fail unexpectedly, or (c) user instructions explicitly override these baselines.
 
 ---
-Revision: v1 (initial onboarding). Keep under two pages by focusing on operational essentials.
+Revision: v2 (October 2025). Clarified testing stack, package management, state management criteria, and Docker usage. Keep under two pages by focusing on operational essentials.
