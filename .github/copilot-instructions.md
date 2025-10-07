@@ -8,22 +8,24 @@ This repository contains a React + Vite + TypeScript application with Tailwind C
 
 Aidventure is an MVP web application that helps adventure racers generate and manage packing checklists, optionally assisted by AI (Azure AI Foundry / Azure OpenAI).
 
-**Current state**: Core infrastructure implemented with working storage layer, state management, and demo component.
+**Current state**: Core infrastructure implemented with storage + state layers and an initial production-oriented Checklist UI (CRUD, categories, progress) replacing the earlier demo-only phase.
 
 **Implemented features**:
 
-- ✅ Complete type definitions for checklists and items
-- ✅ LocalStorage persistence layer with versioning and cross-tab sync
+- ✅ Complete type definitions for checklists / items (`src/types/checklist.ts`)
+- ✅ LocalStorage persistence layer with versioning + cross-tab sync
 - ✅ Zustand state management with full CRUD operations
-- ✅ Comprehensive test coverage (storage + store)
-- ✅ Working demo component showing storage in action
+- ✅ Checklist UI: category grouping, add/edit/delete items, inline editing, bulk complete/reset, progress metrics (see `CHECKLIST_UI.md`)
+- ✅ Accessibility basics: keyboard flows, ARIA labels on interactive elements
+- ✅ Comprehensive tests for storage + state layers (Vitest + RTL)
 - ✅ Docker setup for consistent development
 
-**Pending implementation**:
+**Pending implementation (current priority order)**:
 
-- ⏳ AI service integration (Azure OpenAI)
-- ⏳ User-facing UI pages (checklist view, AI assist modal)
-- ⏳ AI prompt builder and response handler
+- ⏳ AI service integration (Azure OpenAI) + backend proxy (to protect keys)
+- ⏳ AI prompt builder & response parsing/validation (Zod)
+- ⏳ AI Assist modal / workflow wiring into Checklist UI
+- ⏳ Additional component tests (Checklist UI, accessibility & regression)
 
 Current stack (implemented):
 
@@ -53,47 +55,34 @@ Root files:
 - `.gitattributes` – line ending normalization and file type specifications
 - `docker-compose.yml` – Docker Compose configuration for development
 
-Current structure:
+Current structure (abridged – only notable paths):
 
 ```
 frontend/
+  CHECKLIST_UI.md                (UI behavior & UX notes)
   src/
+    App.tsx                      (root app w/ Checklist UI)
     components/
-      ChecklistDemo.tsx  (working demo component)
-    pages/               (empty - to be created)
-    ai/                  (empty - to be created)
-    checklist/           (empty - to be created)
-    state/
-      checklistStore.ts  (complete Zustand store with CRUD)
-    storage/
-      checklistStorage.ts (complete localStorage layer)
-    types/
-      checklist.ts       (complete type definitions)
-    assets/
-      react.svg
+      checklist/
+        ChecklistPage.tsx        (main checklist screen)
+        CategorySection.tsx      (collapsible category panel)
+        ItemRow.tsx              (inline edit row)
+        AddItemForm.tsx          (new item form)
+      ChecklistDemo.tsx          (legacy demo; optional)
+    constants/
+      categories.ts              (default category list)
+    state/checklistStore.ts      (Zustand store)
+    storage/checklistStorage.ts  (localStorage implementation)
+    types/checklist.ts           (domain types)
     __tests__/
-      App.test.tsx            (example test)
-      checklistStorage.test.ts (comprehensive storage tests)
-      checklistStore.test.ts   (comprehensive store tests)
-      setup.ts                 (Vitest setup)
-    App.tsx              (uses ChecklistDemo)
-    main.tsx             (React entry point)
-    index.css            (Tailwind directives)
-  public/
-    vite.svg
-  index.html
-  package.json           (all dependencies installed)
-  tsconfig.json          (base config)
-  tsconfig.app.json      (app-specific config)
-  tsconfig.node.json     (node-specific config)
-  vite.config.ts         (Vitest configured)
-  tailwind.config.js     (configured with custom theme)
-  postcss.config.js
-  eslint.config.js       (flat config with React + TypeScript + Prettier)
-  Dockerfile             (multi-stage build for production)
-  README.md              (Vite template info)
-  STORAGE.md             (storage implementation documentation)
-backend/ (not yet created - add when AI proxy needed)
+      checklistStorage.test.ts
+      checklistStore.test.ts
+      App.test.tsx
+    index.css / main.tsx
+  tailwind.config.js             (theme & colors)
+  vite.config.ts                 (Vite + Vitest config)
+  eslint.config.js               (flat ESLint config)
+  STORAGE.md                     (storage docs)
 ```
 
 ## 3. Build & Run (Implemented)
@@ -166,10 +155,10 @@ Testing infrastructure is complete with comprehensive test coverage for storage 
 
 **Current test coverage**:
 
-- ✅ Storage layer: CRUD operations, timestamps, cross-tab sync, error handling
-- ✅ State management: Zustand store with all actions (create, update, delete, items)
-- ✅ Component: Basic App component test
-- ⏳ Demo component: ChecklistDemo (to be added)
+- ✅ Storage layer: CRUD, timestamps, cross-tab sync, error handling
+- ✅ State management: all store actions (create/update/delete items & checklists)
+- ✅ Basic App mount test
+- ⏳ UI component interaction tests (ChecklistPage, ItemRow, AddItemForm) – recommended next
 
 **Testing workflow**:
 
@@ -178,12 +167,12 @@ Testing infrastructure is complete with comprehensive test coverage for storage 
 3. Run `npm run test:ui` for visual test interface
 4. Always run tests before opening PRs
 
-**Coverage priorities for future features**:
+**Coverage priorities (next)**:
 
-- Unit: AI prompt builder (`ai/buildPrompt.ts`), schema validator
-- Component: Checklist CRUD (ChecklistPage, ItemRow) via React Testing Library
-- Integration: End-to-end checklist workflows
-- Accessibility: Use `@testing-library/jest-dom`; optionally add `axe-core` in a dedicated test
+- Add component interaction tests for Checklist UI (add/edit/delete, bulk actions)
+- Introduce AI prompt builder tests (`ai/buildPrompt.ts` once added)
+- Add Zod schema validator tests for AI response parsing
+- Optional: Accessibility assertions (consider `axe-core`)
 
 **Pre-commit checklist**:
 
@@ -242,10 +231,10 @@ Abstract model interaction in `src/ai/aiService.ts` (to be created):
 
 When integrating with the existing state layer:
 
-1. AI responses should be parsed into `AIChecklistResponse` type
-2. Use `createChecklist()` from store to create new checklist
-3. Use `addItem()` to populate items from AI response
-4. Consider adding `aiMetadata?: GeneratedChecklistMeta` to track AI-generated checklists
+1. Parse AI responses into `AIChecklistResponse`.
+2. Use `createChecklist()` to instantiate a new checklist.
+3. Map AI `CategoryResponse.items` to store `addItem()` calls (respect priority, notes, quantity).
+4. Populate `generatedMeta` on the checklist (already supported via `generatedMeta?` field name alignment: use `GeneratedChecklistMeta`).
 
 Never expose Azure keys client-side. If no backend yet, mock responses until backend layer is introduced.
 
@@ -310,18 +299,7 @@ Frontend scaffold is complete. When adding features, create in this order:
 6. Business logic in `src/checklist/`
 7. Tests alongside implementation in `__tests__/` or co-located
 
-Core infrastructure files already exist:
-
-- `package.json`, `tsconfig.json`, `vite.config.ts`, `eslint.config.js`
-- `index.html`, `src/main.tsx`, `src/App.tsx`
-- `src/types/checklist.ts` (complete type definitions)
-- `src/storage/checklistStorage.ts` (complete localStorage implementation)
-- `src/state/checklistStore.ts` (complete Zustand store)
-- `src/components/ChecklistDemo.tsx` (working demo)
-- `src/__tests__/setup.ts` (Vitest configuration)
-- `src/__tests__/checklistStorage.test.ts` (storage layer tests)
-- `src/__tests__/checklistStore.test.ts` (store tests)
-- `docker-compose.yml`, `frontend/Dockerfile` (Docker setup)
+Core infrastructure baseline (do not duplicate in new docs unless changing): types, storage, state, UI components, testing setup, docker, lint/format.
 
 ## 12. Trust These Instructions
 
