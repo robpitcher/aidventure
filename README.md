@@ -13,16 +13,16 @@ Aidventure is a React-based web application designed to help adventure racers cr
 - Complete type system for checklists and items
 - LocalStorage persistence layer with cross-tab synchronization
 - Zustand state management with full CRUD operations
-- Comprehensive test coverage (storage + state management)
-- Working demo component showing the storage system
+- Checklist UI (category grouping, add/edit/delete items, progress, bulk actions) – see `frontend/CHECKLIST_UI.md`
+- Comprehensive test coverage (storage + state management; UI tests upcoming)
 - Docker development environment with hot reload
 - Complete linting and formatting setup
 
 **⏳ In Progress / Planned:**
 
-- User-facing UI pages (checklist view, editing interface)
-- AI service integration (Azure OpenAI)
-- AI-assisted checklist generation flow
+- AI service integration (Azure OpenAI) + backend proxy (secure key usage)
+- AI-assisted checklist generation & refinement flow
+- Additional Checklist UI interaction & accessibility tests
 
 ## Tech Stack
 
@@ -42,11 +42,10 @@ Aidventure is a React-based web application designed to help adventure racers cr
 aidventure/
 ├── frontend/
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   │   └── ChecklistDemo.tsx (working demo)
-│   │   ├── pages/          # Page-level components (to be created)
-│   │   ├── ai/             # AI service and prompt building (to be created)
-│   │   ├── checklist/      # Checklist-specific components (to be created)
+│   │   ├── components/     # UI components (Checklist UI implemented)
+│   │   │   ├── checklist/  # Production Checklist UI components
+│   │   │   └── ChecklistDemo.tsx (legacy demo)
+│   │   ├── ai/             # AI service & prompt building (to be created)
 │   │   ├── state/          # Global state management (Zustand)
 │   │   │   └── checklistStore.ts (complete CRUD operations)
 │   │   ├── storage/        # Persistence layer
@@ -236,12 +235,12 @@ See `src/__tests__/` for examples and `STORAGE.md` for storage implementation de
 
 ### Folder Organization
 
-- `components/` - Reusable UI components
-- `pages/` - Page-level route components
-- `ai/` - AI service, prompt building
-- `checklist/` - Checklist business logic
-- `state/` - Global state stores
-- `types/` - TypeScript interfaces and types
+- `components/checklist/` - Production Checklist UI (see `CHECKLIST_UI.md`)
+- `components/ChecklistDemo.tsx` - Legacy demo component (optional)
+- `ai/` - (Planned) AI service & prompt utilities
+- `state/` - Global state stores (Zustand)
+- `storage/` - Persistence layer abstraction
+- `types/` - TypeScript interfaces and domain types
 
 ## Data Model
 
@@ -380,10 +379,10 @@ docker run -p 8080:80 aidventure-frontend:latest
 
 **Planned Features:**
 
-- User-facing checklist UI (list view, editing, filtering)
-- AI service integration with Azure OpenAI
-- AI-assisted checklist generation with structured Q&A flow
-- Backend proxy for secure Azure OpenAI key management
+- AI service integration with Azure OpenAI (secure backend proxy)
+- AI-assisted checklist generation with structured Q&A & iterative refinement
+- Zod schema validation + robust error handling for AI responses
+- Additional interaction & accessibility test coverage for Checklist UI
 
 **Potential Future Additions:**
 
@@ -415,6 +414,7 @@ MIT License - see LICENSE file for details
 - [PRD.md](./PRD.md) - Detailed product requirements and specifications
 - [QUICKSTART.md](./QUICKSTART.md) - Quick developer onboarding guide
 - [STORAGE.md](./frontend/STORAGE.md) - Storage and state management documentation
+- [Checklist UI Guide](./frontend/CHECKLIST_UI.md) - Detailed UI behaviors & UX patterns
 - [Copilot Instructions](./.github/copilot-instructions.md) - Development guidelines for Copilot agents
 
 ## Support

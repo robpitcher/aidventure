@@ -7,15 +7,17 @@
 - Complete type system and data model
 - LocalStorage persistence with cross-tab sync
 - Zustand state management with CRUD operations
-- Comprehensive test coverage
-- Working demo component
+- Production Checklist UI (category grouping, CRUD, progress, bulk actions) – see `frontend/CHECKLIST_UI.md`
+- Core test coverage (storage + state)
 - Docker development environment
+- Linting & formatting setup
 
-**⏳ To Do:**
+**⏳ In Progress / Planned:**
 
-- User-facing UI pages
-- AI service integration
-- AI-assisted generation flow
+- AI service integration (Azure OpenAI) behind backend proxy
+- AI-assisted checklist generation & iterative refinement flow
+- Zod validation + robust error handling for AI responses
+- Additional UI interaction & accessibility tests
 
 ---
 
@@ -121,26 +123,14 @@ The storage layer (`src/storage/checklistStorage.ts`) provides:
 
 See `frontend/STORAGE.md` for complete documentation.
 
-### File Organization
+### File Organization (Key Paths)
 
-**Implemented:**
-
-- `components/` - Reusable UI components
-  - ✅ `ChecklistDemo.tsx` - Working demo component
-- `state/` - Zustand stores for global state
-  - ✅ `checklistStore.ts` - Complete CRUD operations
-- `storage/` - Persistence layer
-  - ✅ `checklistStorage.ts` - LocalStorage implementation
-- `types/` - TypeScript type definitions
-  - ✅ `checklist.ts` - Complete data model
-- `__tests__/` - Test files (co-located with source)
-  - ✅ `App.test.tsx`, `checklistStorage.test.ts`, `checklistStore.test.ts`
-
-**To be created:**
-
-- `pages/` - Page-level route components
-- `ai/` - AI service, prompt building
-- `checklist/` - Checklist business logic components
+- `components/checklist/` – Production Checklist UI (see `CHECKLIST_UI.md`)
+- `components/ChecklistDemo.tsx` – Legacy demo component
+- `state/checklistStore.ts` – Global Zustand store
+- `storage/checklistStorage.ts` – Persistence layer
+- `types/checklist.ts` – Domain & AI types
+- `ai/` – (Planned) AI service & prompt utilities
 
 ### Code Style
 
@@ -197,33 +187,27 @@ All IDs use `crypto.randomUUID()` for uniqueness.
 
 ## Next Steps
 
-**Current Implementation:**
+Focus areas:
 
-- ✅ Complete data model and type system
-- ✅ Storage layer with localStorage and cross-tab sync
-- ✅ State management with Zustand (full CRUD)
-- ✅ Comprehensive test coverage
-- ✅ Working demo component
-- ✅ Docker development environment
+1. AI Integration (`ai/`)
 
-**Ready for Implementation:**
+- Service wrapper (backend proxy -> Azure OpenAI)
+- Prompt builder & system templates
+- Zod schema validation for structured responses
 
-1. **UI Components** (`components/`, `pages/`)
+2. Generation Workflow
 
-   - Checklist list view
-   - Checklist detail/edit view
-   - Item components (add, edit, display)
-   - Category organization
+- Create + refine flow (chat-style iteration)
+- Mapping AI output -> checklist items
 
-2. **AI Integration** (`ai/`)
+3. Testing Enhancements
 
-   - AI service (`aiService.ts`)
-   - Prompt builder (`buildPrompt.ts`)
-   - Response parser and validator
+- UI interaction tests (add/edit/delete, bulk actions)
+- Accessibility assertions
 
-3. **Business Logic** (`checklist/`)
-   - Filtering and sorting
-   - Bulk operations
-   - Category management
+4. Hardening
 
-See `PRD.md` for complete feature specifications and `frontend/STORAGE.md` for storage implementation details.
+- Error states & fallback messaging for AI failures
+- Schema evolution/versioning strategy
+
+See `PRD.md` for detailed feature specs, `frontend/STORAGE.md` for persistence details, and `frontend/CHECKLIST_UI.md` for UI behavior.

@@ -13,15 +13,16 @@ This is the frontend application for Aidventure, an AI-assisted adventure racing
 - Complete type system (`src/types/checklist.ts`)
 - LocalStorage persistence layer (`src/storage/checklistStorage.ts`)
 - Zustand state management (`src/state/checklistStore.ts`)
-- Comprehensive test coverage
-- Working demo component (`src/components/ChecklistDemo.tsx`)
+- Production Checklist UI (category grouping, CRUD, progress, bulk actions) – see `CHECKLIST_UI.md`
 - Docker development environment
+- Core test coverage (storage + state); UI interaction tests upcoming
 
-**⏳ To Do:**
+**⏳ In Progress / Planned:**
 
-- User-facing UI pages
-- AI service integration
-- AI-assisted generation flow
+- AI service integration (Azure OpenAI) + backend proxy
+- AI-assisted checklist generation & refinement workflow
+- Zod validation for AI responses
+- Additional interaction & accessibility tests
 
 ## Quick Start
 
@@ -55,20 +56,23 @@ npm run dev
 
 ## Architecture
 
-The application follows a layered architecture:
+Layered structure:
 
-1. **Types** (`src/types/`) - Complete TypeScript definitions
-2. **Storage** (`src/storage/`) - LocalStorage with cross-tab sync
-3. **State** (`src/state/`) - Zustand stores with CRUD operations
-4. **Components** (`src/components/`) - React UI components
+1. **Types** (`src/types/`) – Domain model & AI-related types
+2. **Storage** (`src/storage/`) – LocalStorage abstraction + cross-tab sync
+3. **State** (`src/state/`) – Zustand store (CRUD + item operations)
+4. **UI Components** (`src/components/`) – Production Checklist UI in `checklist/`
+5. **AI** (`src/ai/`) – (Planned) prompt building & service wrapper
 
-### Key Files
+### Key Paths
 
-- `src/types/checklist.ts` - Complete data model
-- `src/storage/checklistStorage.ts` - Storage implementation
-- `src/state/checklistStore.ts` - Zustand store with CRUD
-- `src/components/ChecklistDemo.tsx` - Working demo
-- `STORAGE.md` - Storage documentation
+- `types/checklist.ts` – Domain types
+- `storage/checklistStorage.ts` – Persistence implementation
+- `state/checklistStore.ts` – Global store
+- `components/checklist/` – Production Checklist UI
+- `components/ChecklistDemo.tsx` – Legacy demo component
+- `CHECKLIST_UI.md` – Detailed UI behavior & UX notes
+- `STORAGE.md` – Storage & persistence documentation
 
 ## State Management
 
@@ -85,90 +89,27 @@ const { checklists, createChecklist, addItem, updateItem, deleteItem, toggleItem
 
 ## Testing
 
-Comprehensive test coverage with Vitest + React Testing Library:
+Core test coverage (Vitest + React Testing Library):
 
 - Storage layer: `src/__tests__/checklistStorage.test.ts`
 - State management: `src/__tests__/checklistStore.test.ts`
-- Components: `src/__tests__/App.test.tsx`
+- Basic App mounting: `src/__tests__/App.test.tsx`
 
-Run tests: `npm test` or `npm run test:ui`
+Upcoming:
+
+- Checklist UI interaction & accessibility tests
+
+Run tests: `npm test` (watch) or `npm run test:ui` (UI runner)
 
 ## Documentation
 
-- [STORAGE.md](./STORAGE.md) - Storage implementation details
-- [../PRD.md](../PRD.md) - Product requirements
-- [../QUICKSTART.md](../QUICKSTART.md) - Quick start guide
+- `CHECKLIST_UI.md` – UI behavior guide
+- `STORAGE.md` – Storage implementation details
+- `../PRD.md` – Product requirements
+- `../QUICKSTART.md` – Quick start guide
 
-## Tech Stack
+## Tech Stack Summary
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19, Vite 7, TypeScript 5.9, Tailwind CSS 3.4, Zustand 5, Vitest 3.2, ESLint 9 (flat), Prettier 3.6.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+AI integration (Azure OpenAI) will be added behind a backend proxy – never expose keys client-side.
