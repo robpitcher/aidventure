@@ -307,4 +307,40 @@ The agent should rely on this document for standard operations. Only perform add
 
 ---
 
-Revision: v4 (October 2025). Updated to reflect implemented frontend scaffold with React 19, Vite 7, TypeScript 5.9, Tailwind CSS, ESLint 9 (flat config), Prettier, Vitest testing infrastructure, complete storage layer (localStorage with cross-tab sync), Zustand state management with CRUD operations, comprehensive test coverage, working demo component, and Docker setup. All core infrastructure is configured and ready for UI and AI feature implementation.
+## 13. Ongoing Maintenance & Documentation Sync
+
+To keep this file and the root `README.md` accurate and lean, the coding agent MUST do the following whenever a pull request introduces material changes:
+
+1. Trigger conditions (any of these):
+
+- New or removed dependencies, scripts, build tools, or runtime requirements
+- Added / renamed / removed major directories or architectural layers (types, state, storage, ai, components, backend proxy, etc.)
+- Changes to the data model, checklist item fields, AI schemas, or storage versioning approach
+- Adjusted testing stack, linting config, TypeScript settings, or tooling versions
+- New feature flags, environment variables, or required setup steps
+- Deprecation or removal of previously documented features / files
+
+2. Required actions when triggered:
+
+- Update both this instructions file and the root `README.md` (and `QUICKSTART.md` if onboarding steps change) to reflect the new reality.
+- Remove or condense any sections that are now obsolete (do NOT let historical cruft accumulate).
+- Keep descriptions high-signal: prefer links to source files over duplicating large code or exhaustive option lists.
+- Re-order “Pending implementation” list if priorities shift; drop items that are complete or intentionally abandoned.
+- Ensure version references (framework versions, revision tag below) match actual `package.json` and configs.
+
+3. Size & clarity guidelines:
+
+- Target this file to remain concise enough to be read end-to-end quickly; prune stale examples.
+- Fold superseded guidance instead of appending new, conflicting instructions.
+- When removing content, ensure no other doc becomes misleading as a result.
+
+4. Verification checklist before merging qualifying PRs:
+
+- [ ] README updated (features, scripts, setup) if needed
+- [ ] This file updated (architecture/state/tooling) if needed
+- [ ] Outdated references removed (deprecated components, old versions, removed tasks)
+- [ ] Revision line (below) bumped if any substantive edits made here
+
+If a change clearly affects these docs and they are not updated in the same PR, open (or prompt creation of) a follow-up doc maintenance issue.
+
+Revision: v4.1 (October 2025). Added Section 13 for ongoing maintenance & synchronization responsibilities.
