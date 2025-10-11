@@ -53,6 +53,7 @@ export function ItemRow({ item, checklistId, onToggleComplete, onUpdate, onDelet
     }
   };
 
+  // TODO: [Accessibility] Using confirm() is not ideal for accessibility. Replace with a proper modal dialog component that supports keyboard navigation and screen readers.
   const handleDelete = async () => {
     if (confirm(`Delete "${item.name}"?`)) {
       await onDelete(checklistId, item.id);

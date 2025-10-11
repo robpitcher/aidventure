@@ -244,6 +244,7 @@ export function ChecklistPage() {
             <span className="text-sm text-gray-700">Quick Actions:</span>
             <div className="flex gap-2">
               <button
+              // TODO: [Performance] Sequential awaiting in a loop can be slow. Consider using Promise.all() to toggle items concurrently: await Promise.all(currentChecklist.items.filter((i) => !i.completed).map(item => toggleItemComplete(currentChecklist.id, item.id)))
                 onClick={async () => {
                   for (const item of currentChecklist.items.filter((i) => !i.completed)) {
                     await toggleItemComplete(currentChecklist.id, item.id);
@@ -255,6 +256,7 @@ export function ChecklistPage() {
                 Mark All Complete
               </button>
               <button
+              // TODO: [Performance] Sequential awaiting in a loop can be slow. Consider using Promise.all() to toggle items concurrently: await Promise.all(currentChecklist.items.filter((i) => !i.completed).map(item => toggleItemComplete(currentChecklist.id, item.id)))
                 onClick={async () => {
                   for (const item of currentChecklist.items.filter((i) => i.completed)) {
                     await toggleItemComplete(currentChecklist.id, item.id);

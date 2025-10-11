@@ -35,6 +35,7 @@ export function ChecklistOverview() {
     setIsCreatingChecklist(false);
   };
 
+  // TODO: [Accessibility] Using confirm() is not ideal for accessibility. Replace with a proper modal dialog component that supports keyboard navigation and screen readers.
   const handleDeleteChecklist = async (id: string, name: string) => {
     if (
       window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)
