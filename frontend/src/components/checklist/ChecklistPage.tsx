@@ -16,11 +16,13 @@ export function ChecklistPage() {
     deleteItem,
     addItem,
     setCurrentChecklist,
+    deleteChecklist,
   } = useChecklistStore();
 
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isCreatingChecklist, setIsCreatingChecklist] = useState(false);
   const [newChecklistName, setNewChecklistName] = useState('');
+  const [isDeletingChecklist, setIsDeletingChecklist] = useState(false);
 
   useEffect(() => {
     loadChecklists();
@@ -46,6 +48,22 @@ export function ChecklistPage() {
   ) => {
     await addItem(checklistId, item);
     setIsAddingItem(false);
+  };
+
+  const handleDeleteChecklistClick = () => {
+    setIsDeletingChecklist(true);
+  };
+
+  const handleConfirmDeleteChecklist = async () => {
+    if (currentChecklistId) {
+      await deleteChecklist(currentChecklistId);
+      setCurrentChecklist(null);
+      setIsDeletingChecklist(false);
+    }
+  };
+
+  const handleCancelDeleteChecklist = () => {
+    setIsDeletingChecklist(false);
   };
 
   if (isLoading && checklists.length === 0) {
@@ -93,12 +111,21 @@ export function ChecklistPage() {
               {currentChecklist?.name || 'Packing Checklist'}
             </h1>
           </div>
-          <button
-            onClick={() => setIsCreatingChecklist(true)}
-            className="px-4 py-2 bg-accent text-white rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent"
-          >
-            New Checklist
-          </button>
+          {currentChecklist ? (
+            <button
+              onClick={handleDeleteChecklistClick}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600"
+            >
+              Delete Checklist
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsCreatingChecklist(true)}
+              className="px-4 py-2 bg-accent text-white rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              New Checklist
+            </button>
+          )}
         </div>
 
         {currentChecklist && (
@@ -117,6 +144,29 @@ export function ChecklistPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Checklist Confirmation */}
+      {isDeletingChecklist && currentChecklist && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-500 rounded-lg">
+          <p className="text-sm text-gray-900 mb-3">
+            Are you sure you want to delete "{currentChecklist.name}"? This action cannot be undone.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleConfirmDeleteChecklist}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600"
+            >
+              Delete Checklist
+            </button>
+            <button
+              onClick={handleCancelDeleteChecklist}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Create Checklist Form */}
       {isCreatingChecklist && (
@@ -218,7 +268,7 @@ export function ChecklistPage() {
                 {isAddingItem ? (
                   <AddItemForm
                     checklistId={currentChecklist.id}
-                    category="Miscellaneous"
+                    category=""
                     onAdd={handleAddItem}
                     onCancel={() => setIsAddingItem(false)}
                   />

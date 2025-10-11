@@ -3,17 +3,16 @@ import type { Item } from '../../types/checklist';
 
 interface AddItemFormProps {
   checklistId: string;
-  category: string;
+  category?: string; // Optional, not used but kept for backward compatibility
   onAdd: (checklistId: string, item: Omit<Item, 'id'>) => Promise<void>;
   onCancel?: () => void;
 }
 
-export function AddItemForm({ checklistId, category, onAdd, onCancel }: AddItemFormProps) {
+export function AddItemForm({ checklistId, onAdd, onCancel }: AddItemFormProps) {
   const [name, setName] = useState('');
   const [notes, setNotes] = useState('');
   const [quantity, setQuantity] = useState('1');
-  const [priority, setPriority] = useState<'high' | 'normal' | 'optional'>('normal');
-  const [selectedCategory, setSelectedCategory] = useState(category);
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -32,10 +31,9 @@ export function AddItemForm({ checklistId, category, onAdd, onCancel }: AddItemF
     try {
       await onAdd(checklistId, {
         name: name.trim(),
-        category: selectedCategory,
+        category: selectedCategory.trim() || undefined,
         notes: notes.trim() || undefined,
         quantity: quantity ? parseInt(quantity, 10) : undefined,
-        priority,
         completed: false,
       });
 
@@ -43,7 +41,7 @@ export function AddItemForm({ checklistId, category, onAdd, onCancel }: AddItemF
       setName('');
       setNotes('');
       setQuantity('1');
-      setPriority('normal');
+      setSelectedCategory('');
       inputRef.current?.focus();
     } finally {
       setIsSubmitting(false);
@@ -92,29 +90,16 @@ export function AddItemForm({ checklistId, category, onAdd, onCancel }: AddItemF
           aria-label="Notes"
         />
 
-        <div className="flex gap-2">
-          <input
-            type="number"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Quantity"
-            className="w-24 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent"
-            aria-label="Quantity"
-            min="1"
-          />
-
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value as 'high' | 'normal' | 'optional')}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent"
-            aria-label="Priority"
-          >
-            <option value="high">High Priority</option>
-            <option value="normal">Normal</option>
-            <option value="optional">Optional</option>
-          </select>
-        </div>
+        <input
+          type="number"
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Quantity"
+          className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent"
+          aria-label="Quantity"
+          min="1"
+        />
 
         <div className="flex gap-2">
           <button

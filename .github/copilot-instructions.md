@@ -15,8 +15,11 @@ Aidventure is an MVP web application that helps adventure racers generate and ma
 - ✅ Complete type definitions for checklists / items (`src/types/checklist.ts`)
 - ✅ LocalStorage persistence layer with versioning + cross-tab sync
 - ✅ Zustand state management with full CRUD operations
-- ✅ Checklist UI: category grouping, add/edit/delete items, inline editing, bulk complete/reset, progress metrics (see `CHECKLIST_UI.md`)
-- ✅ Accessibility basics: keyboard flows, ARIA labels on interactive elements
+- ✅ Checklist UI: category-based organization, add/edit/delete items, inline editing, bulk complete/reset, progress metrics
+- ✅ Category labels displayed and editable from both checklist view and item edit mode
+- ✅ In-page confirmations for all delete actions (checklist and items)
+- ✅ Hover underlines on clickable checklist and item names
+- ✅ Accessibility basics: keyboard flows, ARIA labels on interactive elements, no popups for confirmations
 - ✅ Comprehensive tests for storage + state layers (Vitest + RTL)
 - ✅ Docker setup for consistent development
 

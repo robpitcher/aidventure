@@ -13,7 +13,10 @@ Aidventure is a React-based web application designed to help adventure racers cr
 - Complete type system for checklists and items
 - LocalStorage persistence layer with cross-tab synchronization
 - Zustand state management with full CRUD operations
-- Checklist UI (category grouping, add/edit/delete items, progress, bulk actions) – see `frontend/CHECKLIST_UI.md`
+- Checklist UI with category-based organization, inline editing, and delete confirmations
+- Category labels displayed and editable from both checklist view and item scope
+- In-page confirmations for all delete actions (no popups)
+- Visual feedback with hover underlines on clickable elements
 - Comprehensive test coverage (storage + state management; UI tests upcoming)
 - Docker development environment with hot reload
 - Complete linting and formatting setup
