@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useChecklistStore } from '../../state/checklistStore';
-import { CategorySection } from './CategorySection';
-import { DEFAULT_CATEGORIES } from '../../constants/categories';
-import type { Item } from '../../types/checklist';
+import { ItemRow } from './ItemRow';
+import { AddItemForm } from './AddItemForm';
 
 export function ChecklistPage() {
   const {
@@ -18,6 +17,8 @@ export function ChecklistPage() {
     addItem,
   } = useChecklistStore();
 
+  const [isAddingItem, setIsAddingItem] = useState(false);
+
   useEffect(() => {
     loadChecklists();
   }, [loadChecklists]);
@@ -27,6 +28,11 @@ export function ChecklistPage() {
     if (name?.trim()) {
       await createChecklist(name.trim());
     }
+  };
+
+  const handleAddItem = async (checklistId: string, item: Omit<import('../../types/checklist').Item, 'id'>) => {
+    await addItem(checklistId, item);
+    setIsAddingItem(false);
   };
 
   if (isLoading && checklists.length === 0) {
@@ -46,14 +52,6 @@ export function ChecklistPage() {
   }
 
   const currentChecklist = checklists.find((c) => c.id === currentChecklistId);
-
-  // Group items by category
-  const itemsByCategory = currentChecklist
-    ? DEFAULT_CATEGORIES.reduce((acc, category) => {
-        acc[category] = currentChecklist.items.filter((item) => item.category === category);
-        return acc;
-      }, {} as Record<string, Item[]>)
-    : {};
 
   // Calculate stats
   const totalItems = currentChecklist?.items.length || 0;
@@ -122,28 +120,52 @@ export function ChecklistPage() {
         </div>
       )}
 
-      {/* Categories */}
+      {/* Items List */}
       {currentChecklist && (
         <div className="space-y-4">
-          {DEFAULT_CATEGORIES.map((category) => {
-            const categoryItems = itemsByCategory[category] || [];
-            // Only show categories with items, or all categories if checklist is empty
-            if (categoryItems.length > 0 || totalItems === 0) {
-              return (
-                <CategorySection
-                  key={category}
-                  category={category}
-                  items={categoryItems}
-                  checklistId={currentChecklist.id}
-                  onToggleComplete={toggleItemComplete}
-                  onUpdateItem={updateItem}
-                  onDeleteItem={deleteItem}
-                  onAddItem={addItem}
-                />
-              );
-            }
-            return null;
-          })}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            {totalItems === 0 && !isAddingItem ? (
+              <div className="text-center py-8 text-gray-500">
+                <p className="mb-2">Your checklist is empty</p>
+                <button
+                  onClick={() => setIsAddingItem(true)}
+                  className="text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent rounded px-2"
+                >
+                  Add your first item
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {currentChecklist.items.map((item) => (
+                  <ItemRow
+                    key={item.id}
+                    item={item}
+                    checklistId={currentChecklist.id}
+                    onToggleComplete={toggleItemComplete}
+                    onUpdate={updateItem}
+                    onDelete={deleteItem}
+                  />
+                ))}
+                
+                {isAddingItem ? (
+                  <AddItemForm
+                    checklistId={currentChecklist.id}
+                    category="Miscellaneous"
+                    onAdd={handleAddItem}
+                    onCancel={() => setIsAddingItem(false)}
+                  />
+                ) : (
+                  <button
+                    onClick={() => setIsAddingItem(true)}
+                    className="w-full py-2 border-2 border-dashed border-gray-300 rounded text-gray-600 hover:border-accent hover:text-accent transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
+                    aria-label="Add item"
+                  >
+                    + Add Item
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
