@@ -15,22 +15,35 @@ export function ChecklistPage() {
     updateItem,
     deleteItem,
     addItem,
+    setCurrentChecklist,
   } = useChecklistStore();
 
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [isCreatingChecklist, setIsCreatingChecklist] = useState(false);
+  const [newChecklistName, setNewChecklistName] = useState('');
 
   useEffect(() => {
     loadChecklists();
   }, [loadChecklists]);
 
-  const handleCreateChecklist = async () => {
-    const name = prompt('Enter checklist name:');
-    if (name?.trim()) {
-      await createChecklist(name.trim());
+  const handleCreateChecklist = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (newChecklistName.trim()) {
+      await createChecklist(newChecklistName.trim());
+      setNewChecklistName('');
+      setIsCreatingChecklist(false);
     }
   };
 
-  const handleAddItem = async (checklistId: string, item: Omit<import('../../types/checklist').Item, 'id'>) => {
+  const handleCancelCreate = () => {
+    setNewChecklistName('');
+    setIsCreatingChecklist(false);
+  };
+
+  const handleAddItem = async (
+    checklistId: string,
+    item: Omit<import('../../types/checklist').Item, 'id'>
+  ) => {
     await addItem(checklistId, item);
     setIsAddingItem(false);
   };
@@ -45,9 +58,7 @@ export function ChecklistPage() {
 
   if (error) {
     return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700">
-        Error: {error}
-      </div>
+      <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700">Error: {error}</div>
     );
   }
 
@@ -63,11 +74,27 @@ export function ChecklistPage() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {currentChecklist?.name || 'Packing Checklist'}
-          </h1>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setCurrentChecklist(null)}
+              className="p-2 text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded"
+              aria-label="Back to overview"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {currentChecklist?.name || 'Packing Checklist'}
+            </h1>
+          </div>
           <button
-            onClick={handleCreateChecklist}
+            onClick={() => setIsCreatingChecklist(true)}
             className="px-4 py-2 bg-accent text-white rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent"
           >
             New Checklist
@@ -91,6 +118,47 @@ export function ChecklistPage() {
         )}
       </div>
 
+      {/* Create Checklist Form */}
+      {isCreatingChecklist && (
+        <div className="mb-6 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+          <form onSubmit={handleCreateChecklist} className="space-y-4">
+            <div>
+              <label
+                htmlFor="checklist-name"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Checklist Name
+              </label>
+              <input
+                id="checklist-name"
+                type="text"
+                value={newChecklistName}
+                onChange={(e) => setNewChecklistName(e.target.value)}
+                placeholder="Enter checklist name..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+                autoFocus
+                required
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-accent text-white rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent"
+              >
+                Create Checklist
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelCreate}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* Empty State */}
       {!currentChecklist && (
         <div className="text-center py-16 bg-white rounded-lg border-2 border-dashed border-gray-300">
@@ -112,7 +180,7 @@ export function ChecklistPage() {
             Create a new checklist to start planning your adventure race gear
           </p>
           <button
-            onClick={handleCreateChecklist}
+            onClick={() => setIsCreatingChecklist(true)}
             className="px-6 py-3 bg-accent text-white rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent"
           >
             Create Your First Checklist
@@ -146,7 +214,7 @@ export function ChecklistPage() {
                     onDelete={deleteItem}
                   />
                 ))}
-                
+
                 {isAddingItem ? (
                   <AddItemForm
                     checklistId={currentChecklist.id}
@@ -177,7 +245,7 @@ export function ChecklistPage() {
             <div className="flex gap-2">
               <button
                 onClick={async () => {
-                  for (const item of currentChecklist.items.filter(i => !i.completed)) {
+                  for (const item of currentChecklist.items.filter((i) => !i.completed)) {
                     await toggleItemComplete(currentChecklist.id, item.id);
                   }
                 }}
@@ -188,7 +256,7 @@ export function ChecklistPage() {
               </button>
               <button
                 onClick={async () => {
-                  for (const item of currentChecklist.items.filter(i => i.completed)) {
+                  for (const item of currentChecklist.items.filter((i) => i.completed)) {
                     await toggleItemComplete(currentChecklist.id, item.id);
                   }
                 }}

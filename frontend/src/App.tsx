@@ -1,6 +1,10 @@
 import { ChecklistPage } from './components/checklist/ChecklistPage';
+import { ChecklistOverview } from './components/checklist/ChecklistOverview';
+import { useChecklistStore } from './state/checklistStore';
 
 function App() {
+  const { currentChecklistId } = useChecklistStore();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-primary text-white shadow-md">
@@ -21,7 +25,7 @@ function App() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <ChecklistPage />
+        {currentChecklistId ? <ChecklistPage /> : <ChecklistOverview />}
       </main>
     </div>
   );
