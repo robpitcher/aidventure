@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Item } from '../../types/checklist';
-import { DEFAULT_CATEGORIES } from '../../constants/categories';
 
 interface AddItemFormProps {
   checklistId: string;
@@ -12,7 +11,7 @@ interface AddItemFormProps {
 export function AddItemForm({ checklistId, category, onAdd, onCancel }: AddItemFormProps) {
   const [name, setName] = useState('');
   const [notes, setNotes] = useState('');
-  const [quantity, setQuantity] = useState('');
+  const [quantity, setQuantity] = useState('1');
   const [priority, setPriority] = useState<'high' | 'normal' | 'optional'>('normal');
   const [selectedCategory, setSelectedCategory] = useState(category);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,7 +23,7 @@ export function AddItemForm({ checklistId, category, onAdd, onCancel }: AddItemF
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       return;
     }
@@ -39,11 +38,11 @@ export function AddItemForm({ checklistId, category, onAdd, onCancel }: AddItemF
         priority,
         completed: false,
       });
-      
+
       // Reset form
       setName('');
       setNotes('');
-      setQuantity('');
+      setQuantity('1');
       setPriority('normal');
       inputRef.current?.focus();
     } finally {
@@ -72,19 +71,16 @@ export function AddItemForm({ checklistId, category, onAdd, onCancel }: AddItemF
           aria-label="Item name"
           required
         />
-        
-        <select
+
+        <input
+          type="text"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Category (optional)"
           className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent"
           aria-label="Category"
-        >
-          {DEFAULT_CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+        />
 
         <input
           type="text"
@@ -107,7 +103,7 @@ export function AddItemForm({ checklistId, category, onAdd, onCancel }: AddItemF
             aria-label="Quantity"
             min="1"
           />
-          
+
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value as 'high' | 'normal' | 'optional')}
