@@ -11,9 +11,11 @@ interface ItemRowProps {
 
 export function ItemRow({ item, checklistId, onToggleComplete, onUpdate, onDelete }: ItemRowProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [editedName, setEditedName] = useState(item.name);
   const [editedNotes, setEditedNotes] = useState(item.notes || '');
   const [editedQuantity, setEditedQuantity] = useState(item.quantity?.toString() || '');
+  const [editedCategory, setEditedCategory] = useState(item.category || '');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -30,6 +32,7 @@ export function ItemRow({ item, checklistId, onToggleComplete, onUpdate, onDelet
 
     await onUpdate(checklistId, item.id, {
       name: editedName.trim(),
+      category: editedCategory.trim() || undefined,
       notes: editedNotes.trim() || undefined,
       quantity: editedQuantity ? parseInt(editedQuantity, 10) : undefined,
     });
@@ -40,6 +43,7 @@ export function ItemRow({ item, checklistId, onToggleComplete, onUpdate, onDelet
     setEditedName(item.name);
     setEditedNotes(item.notes || '');
     setEditedQuantity(item.quantity?.toString() || '');
+    setEditedCategory(item.category || '');
     setIsEditing(false);
   };
 
@@ -53,12 +57,46 @@ export function ItemRow({ item, checklistId, onToggleComplete, onUpdate, onDelet
     }
   };
 
-  // TODO: [Accessibility] Using confirm() is not ideal for accessibility. Replace with a proper modal dialog component that supports keyboard navigation and screen readers.
-  const handleDelete = async () => {
-    if (confirm(`Delete "${item.name}"?`)) {
-      await onDelete(checklistId, item.id);
-    }
+  // In-page confirmation for delete
+  const handleDeleteClick = () => {
+    setIsDeleting(true);
   };
+
+  const handleConfirmDelete = async () => {
+    await onDelete(checklistId, item.id);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleting(false);
+  };
+
+  if (isDeleting) {
+    return (
+      <div className="p-3 border border-red-500 rounded bg-red-50">
+        <div className="space-y-3">
+          <p className="text-sm text-gray-900">
+            Delete "{item.name}"?
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleConfirmDelete}
+              className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600"
+              aria-label="Confirm delete"
+            >
+              Delete
+            </button>
+            <button
+              onClick={handleCancelDelete}
+              className="px-3 py-1 bg-gray-400 text-white rounded hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              aria-label="Cancel delete"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isEditing) {
     return (
@@ -73,6 +111,15 @@ export function ItemRow({ item, checklistId, onToggleComplete, onUpdate, onDelet
             className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent"
             placeholder="Item name"
             aria-label="Item name"
+          />
+          <input
+            type="text"
+            value={editedCategory}
+            onChange={(e) => setEditedCategory(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent"
+            placeholder="Category (optional)"
+            aria-label="Category"
           />
           <input
             type="text"
@@ -126,9 +173,10 @@ export function ItemRow({ item, checklistId, onToggleComplete, onUpdate, onDelet
         />
         <div className="flex-1 min-w-0">
           <p
-            className={`font-medium ${
+            className={`font-medium hover:underline cursor-pointer ${
               item.completed ? 'line-through text-gray-500' : 'text-gray-900'
             }`}
+            onClick={() => setIsEditing(true)}
           >
             {item.name}
             {item.quantity && (
@@ -138,17 +186,12 @@ export function ItemRow({ item, checklistId, onToggleComplete, onUpdate, onDelet
           {item.notes && (
             <p className="text-sm text-gray-600 mt-1">{item.notes}</p>
           )}
-          {item.priority && (
+          {item.category && (
             <span
-              className={`inline-block mt-1 px-2 py-0.5 text-xs rounded ${
-                item.priority === 'high'
-                  ? 'bg-warning/20 text-warning'
-                  : item.priority === 'optional'
-                  ? 'bg-gray-200 text-gray-600'
-                  : 'bg-blue-100 text-blue-600'
-              }`}
+              onClick={() => setIsEditing(true)}
+              className="inline-block mt-1 px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-600 hover:bg-blue-200 cursor-pointer"
             >
-              {item.priority}
+              {item.category}
             </span>
           )}
         </div>
@@ -173,7 +216,7 @@ export function ItemRow({ item, checklistId, onToggleComplete, onUpdate, onDelet
             </svg>
           </button>
           <button
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             className="p-1 text-gray-600 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-600 rounded"
             aria-label={`Delete ${item.name}`}
           >

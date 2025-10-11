@@ -15,10 +15,9 @@ export type Checklist = {
 export type Item = {
   id: string;
   name: string;
-  category: string;
+  category?: string;
   notes?: string;
   quantity?: number;
-  priority?: 'high' | 'normal' | 'optional';
   completed: boolean;
 };
 
@@ -59,5 +58,4 @@ export type ItemResponse = {
   itemName: string;
   quantity?: number;
   notes?: string;
-  priority?: 'high' | 'normal' | 'optional';
 };

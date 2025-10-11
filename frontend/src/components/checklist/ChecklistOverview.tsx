@@ -9,13 +9,11 @@ export function ChecklistOverview() {
     error,
     loadChecklists,
     createChecklist,
-    deleteChecklist,
     setCurrentChecklist,
   } = useChecklistStore();
 
   const [isCreatingChecklist, setIsCreatingChecklist] = useState(false);
   const [newChecklistName, setNewChecklistName] = useState('');
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadChecklists();
@@ -33,20 +31,6 @@ export function ChecklistOverview() {
   const handleCancelCreate = () => {
     setNewChecklistName('');
     setIsCreatingChecklist(false);
-  };
-
-  // TODO: [Accessibility] Using confirm() is not ideal for accessibility. Replace with a proper modal dialog component that supports keyboard navigation and screen readers.
-  const handleDeleteChecklist = async (id: string, name: string) => {
-    if (
-      window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)
-    ) {
-      setDeletingId(id);
-      try {
-        await deleteChecklist(id);
-      } finally {
-        setDeletingId(null);
-      }
-    }
   };
 
   const handleSelectChecklist = (id: string) => {
@@ -177,60 +161,36 @@ export function ChecklistOverview() {
           {checklists.map((checklist) => {
             const { totalItems, completedItems, completionPercentage } =
               getChecklistStats(checklist);
-            const isDeleting = deletingId === checklist.id;
 
             return (
               <div
                 key={checklist.id}
-                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow relative"
+                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleSelectChecklist(checklist.id)}
               >
-                {/* Delete Button */}
-                <button
-                  onClick={() => handleDeleteChecklist(checklist.id, checklist.name)}
-                  disabled={isDeleting}
-                  className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
-                  aria-label={`Delete ${checklist.name}`}
-                >
-                  {isDeleting ? (
-                    <div className="w-4 h-4 border-2 border-gray-300 border-t-red-600 rounded-full animate-spin" />
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  )}
-                </button>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:underline">
+                  {checklist.name}
+                </h3>
 
-                {/* Checklist Content */}
-                <div className="cursor-pointer" onClick={() => handleSelectChecklist(checklist.id)}>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 pr-8">
-                    {checklist.name}
-                  </h3>
-
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>
-                        {completedItems} of {totalItems} items completed
-                      </span>
-                      <span className="font-medium">{completionPercentage}%</span>
-                    </div>
-
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-success h-2 rounded-full transition-all"
-                        style={{ width: `${completionPercentage}%` }}
-                      />
-                    </div>
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center justify-between text-sm text-gray-600">
+                    <span>
+                      {completedItems} of {totalItems} items completed
+                    </span>
+                    <span className="font-medium">{completionPercentage}%</span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>Created: {formatDate(checklist.createdAt)}</span>
-                    <span>Updated: {formatDate(checklist.updatedAt)}</span>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-success h-2 rounded-full transition-all"
+                      style={{ width: `${completionPercentage}%` }}
+                    />
                   </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>Created: {formatDate(checklist.createdAt)}</span>
+                  <span>Updated: {formatDate(checklist.updatedAt)}</span>
                 </div>
               </div>
             );

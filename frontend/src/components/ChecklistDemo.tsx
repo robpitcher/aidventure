@@ -32,14 +32,12 @@ export function ChecklistDemo() {
     await addItem(checklist.id, {
       name: 'Topographic maps',
       category: 'Navigation',
-      priority: 'high',
       completed: false,
     });
 
     await addItem(checklist.id, {
       name: 'Compass',
       category: 'Navigation',
-      priority: 'high',
       completed: false,
     });
 
@@ -47,7 +45,6 @@ export function ChecklistDemo() {
       name: 'Energy gels',
       category: 'Nutrition',
       quantity: 10,
-      priority: 'normal',
       completed: false,
     });
 
@@ -55,14 +52,12 @@ export function ChecklistDemo() {
       name: 'Water bottles',
       category: 'Hydration',
       quantity: 2,
-      priority: 'high',
       completed: false,
     });
 
     await addItem(checklist.id, {
       name: 'First aid kit',
       category: 'Emergency',
-      priority: 'high',
       completed: false,
     });
 
@@ -157,7 +152,6 @@ export function ChecklistDemo() {
                       </p>
                       <p className="text-sm text-gray-600">
                         {item.category}
-                        {item.priority && ` • ${item.priority}`}
                       </p>
                     </div>
                   </div>
