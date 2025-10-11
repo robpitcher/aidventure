@@ -5,7 +5,7 @@ import App from '../App';
 describe('App', () => {
   it('renders the app title', () => {
     render(<App />);
-    expect(screen.getByText('Aidventure')).toBeInTheDocument();
+    expect(screen.getByText('Aidventure Pack Planner')).toBeInTheDocument();
   });
 
   it('renders the subtitle', () => {
